@@ -1,0 +1,12 @@
+fastapi
+uvicorn[standard]
+websockets
+streamlit
+plotly
+pandas
+numpy
+scikit-learn
+river
+scipy
+pyyaml
+requests

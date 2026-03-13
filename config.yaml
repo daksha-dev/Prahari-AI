@@ -1,0 +1,241 @@
+
+# ============================================================================
+# IoT Trust & Drift Analytics System — Master Configuration
+# ============================================================================
+# Every tunable parameter lives here. Python code reads from this file
+# instead of using hardcoded constants, so you can adjust thresholds,
+# weights, and policies without touching any source code.
+# ============================================================================
+
+
+# ── 1. DATA ─────────────────────────────────────────────────────────────────
+# Controls how raw CICIoT2023 CSV data is loaded, windowed, and labelled.
+# ─────────────────────────────────────────────────────────────────────────────
+data:
+  window_size_seconds: 60        # Duration of each time window (seconds)
+  burn_in_windows: 30           # Number of initial windows used to build a
+                                 # baseline profile before scoring begins.
+                                 # During burn-in, trust is held at its initial
+                                 # value and no drift detection runs.
+  min_flows_per_window: 5        # Windows with fewer flow records than this
+                                 # are discarded — too little data to be
+                                 # statistically meaningful.
+  device_column: "src_ip"        # Column name that identifies the source device
+  label_column: "label"          # Column that carries ground-truth attack labels
+  benign_label: "Benign"         # Value of label_column for normal traffic
+
+
+# ── 2. MODELS ───────────────────────────────────────────────────────────────
+# Configuration for the two anomaly detection models.  Their scores are
+# combined using the specified weights (must sum to 1.0).
+# ─────────────────────────────────────────────────────────────────────────────
+models:
+
+  isolation_forest:
+    weight: 0.6                  # Contribution to the blended anomaly score.
+                                 # Higher weight because IF is more stable on
+                                 # batch-collected network flow features.
+    n_estimators: 100            # Number of isolation trees in the ensemble
+    contamination: 0.05          # Expected fraction of anomalies in training
+                                 # data. Lower = stricter anomaly boundary.
+    random_state: 42             # Seed for reproducibility
+
+  halfspacetrees:
+    weight: 0.4                  # Contribution to the blended anomaly score.
+                                 # Lower weight because HST is an online learner
+                                 # and needs time to converge.
+    n_trees: 25                  # Number of half-space trees
+    height: 6                    # Max depth of each tree. Deeper trees capture
+                                 # finer-grained anomalies but risk overfitting.
+    window_size: 30              # Internal reference-window size (number of
+                                 # instances) used by HST for mass estimation.
+
+
+# ── 3. ANOMALY ──────────────────────────────────────────────────────────────
+# Post-processing applied to the raw blended anomaly score before it
+# feeds into the trust update equation.
+# ─────────────────────────────────────────────────────────────────────────────
+anomaly:
+  smoothing_window: 3            # Rolling-average window (in time-windows) to
+                                 # smooth noisy per-window anomaly scores.
+                                 # Reduces false spikes from single outlier
+                                 # windows.
+  anomaly_threshold: 0.35        # Scores above this are treated as anomalous.
+                                 # Range 0-1; lower = more sensitive.
+
+
+# ── 4. TRUST ────────────────────────────────────────────────────────────────
+# Parameters for the device trust score update rule.
+#
+#   if anomalous:
+#       score -= penalty_multiplier * anomaly_score * drift_factor
+#   else:
+#       score += recovery_rate
+#
+# Score is always clamped to [min_score, max_score].
+# ─────────────────────────────────────────────────────────────────────────────
+trust:
+  initial_score: 100             # Every device starts fully trusted
+  penalty_multiplier: 8         # Scales the magnitude of trust deductions.
+                                 # Larger values make the system react faster
+                                 # to anomalies but risk over-penalising.
+  recovery_rate: 2.0             # Points regained per clean (non-anomalous)
+                                 # window. Allows benign devices to recover
+                                 # from occasional false positives.
+  min_score: 0                   # Floor — device cannot go below this
+  max_score: 100                 # Ceiling — device cannot exceed this
+
+
+# ── 5. DRIFT ────────────────────────────────────────────────────────────────
+# Three independent drift detection signals.  When enough signals fire
+# simultaneously (see confirmation.signals_required), the system declares
+# a confirmed distribution drift for the device.
+# ─────────────────────────────────────────────────────────────────────────────
+drift:
+
+  # ADWIN (Adaptive Windowing) — detects mean-shift in the anomaly score
+  # stream.  Small delta = more sensitive to subtle shifts.
+  adwin:
+    enabled: true
+    delta: 0.05                  # Confidence parameter. Higher values make
+                                 # ADWIN more sensitive with fewer samples.
+                                 # 0.002 was too conservative for 20-window
+                                 # monitoring — never fired. 0.05 balances
+                                 # sensitivity with false-positive avoidance.
+
+  # Chi-squared test — compares the feature distribution of recent windows
+  # against the burn-in baseline.  Fires when enough individual features
+  # show statistically significant change.
+  chi_squared:
+    enabled: true
+    p_threshold: 0.01            # Per-feature significance level. Features
+                                 # with chi-squared p-value below this are
+                                 # considered drifted.
+    min_features_drifted: 3      # Minimum number of features that must drift
+                                 # before this signal fires. Prevents false
+                                 # alarms from one noisy feature.
+    recent_windows: 10           # Number of most-recent windows to compare
+                                 # against the baseline distribution.
+
+  # Model disagreement — monitors the gap between Isolation Forest and
+  # Half-Space Trees scores.  Persistent large disagreement suggests the
+  # data has shifted in a way that affects one model more than the other.
+  disagreement:
+    enabled: true
+    consecutive_windows: 3       # The gap must persist for this many windows
+                                 # in a row before the signal fires.
+    if_threshold: 0.15           # IF score above which it considers data
+                                 # anomalous (used to measure disagreement)
+    hst_threshold: 0.1           # HST score above which it considers data
+                                 # anomalous (used to measure disagreement)
+
+  # Confirmation rule — how many of the three signals above must fire in
+  # the same window to declare a confirmed drift event.
+  confirmation:
+    signals_required: 1          # 1 = very sensitive (any single signal),
+                                 # 2 = balanced, 3 = very conservative
+
+
+# ── 6. DRIFT_FACTOR ─────────────────────────────────────────────────────────
+# When drift is detected the trust penalty is amplified by a drift factor.
+# Each active drift signal contributes additively to the factor.
+#
+#   drift_factor = base
+#                  + adwin_contribution   (if ADWIN fired)
+#                  + chi_sq_contribution  (if chi-squared fired)
+#                  + disagr_contribution  (if disagreement fired)
+#   drift_factor = min(drift_factor, max_factor)
+# ─────────────────────────────────────────────────────────────────────────────
+drift_factor:
+  base: 1.0                     # Multiplier when no drift signals are active
+  adwin_contribution: 0.5       # Added when ADWIN detects a shift
+  chi_squared_contribution: 0.3 # Added when chi-squared test fires
+  disagreement_contribution: 0.2 # Added when model disagreement fires
+  max_factor: 2.0               # Cap to prevent runaway penalties
+
+
+# ── 7. POLICY ───────────────────────────────────────────────────────────────
+# Rule-based checks applied on top of statistical anomaly detection.
+# Each rule can be independently enabled/disabled and carries its own
+# fixed trust penalty (applied once per window the rule triggers).
+# ─────────────────────────────────────────────────────────────────────────────
+policy:
+
+  # Fires when a device contacts more unique destination IPs in one window
+  # than the threshold. Typical of reconnaissance or worm propagation.
+  excessive_destinations:
+    enabled: true
+    threshold: 20                # Max unique destination IPs per window
+    penalty: 15
+
+  # Fires when average bytes/sec in a window exceeds the threshold.
+  # Catches volumetric DDoS participation and data exfiltration.
+  bandwidth_spike:
+    enabled: true
+    threshold_bytes_sec: 100000  # 100 KB/s — adjust for your network baseline
+    penalty: 20
+
+  # Fires when traffic is seen on known-dangerous ports.
+  # Port 23 (Telnet) is the primary Mirai propagation vector.
+  forbidden_ports:
+    enabled: true
+    ports: [23, 4444, 5555, 6667]  # Telnet, Metasploit, backdoor, IRC C2
+    penalty: 25
+
+  # Fires when a device uses a protocol not seen during its burn-in
+  # baseline. Indicates possible compromise or misconfiguration.
+  protocol_violation:
+    enabled: true
+    penalty: 10
+
+  # Fires when the SYN-to-ACK ratio exceeds the threshold, a strong
+  # indicator of SYN flood attacks.
+  syn_flood:
+    enabled: true
+    syn_ack_ratio: 5.0           # SYN count / ACK count above this = alert
+    penalty: 15
+
+
+# ── 8. SEVERITY ─────────────────────────────────────────────────────────────
+# Maps trust score ranges to human-readable severity labels.
+# Ranges are [low, high) — a score of exactly 70 is "warning", not "normal".
+# ─────────────────────────────────────────────────────────────────────────────
+severity:
+  normal:   [70, 100]            # Device is behaving within expected norms
+  warning:  [50, 70]             # Mild anomalies detected — worth monitoring
+  high:     [30, 50]             # Significant deviation — investigate soon
+  critical: [0, 30]              # Severe anomaly — consider isolating device
+
+
+# ── 9. SYNTHETIC_DRIFT ──────────────────────────────────────────────────────
+# Settings for generating synthetic drift scenarios used in demos and
+# evaluation.  Each scenario injects a specific attack pattern into an
+# otherwise-benign device stream.
+# ─────────────────────────────────────────────────────────────────────────────
+synthetic_drift:
+  n_windows: 50                  # Total windows per synthetic scenario
+                                 # (includes both clean and drifted phases)
+  scenarios:
+    - "Camera Reconnaissance"    # Simulates an IP camera pivoting to port
+                                 # scanning after initial benign operation
+    - "Thermostat DDoS"          # Simulates a smart thermostat recruited into
+                                 # a DDoS botnet mid-stream
+    - "Smart Lock Brute Force"   # Simulates a smart lock attempting credential
+                                 # stuffing against other devices
+
+
+# ── 10. EXPLAINABILITY ─────────────────────────────────────────────────────
+# Controls the automatic generation of human-readable explanations for
+# why a device's trust score dropped.
+# ─────────────────────────────────────────────────────────────────────────────
+explainability:
+  min_zscore_to_report: 2.0      # Only mention features whose z-score vs
+                                 # baseline exceeds this value. Keeps
+                                 # explanations focused on truly unusual
+                                 # dimensions.
+  top_n_features: 5              # Maximum number of features to include in
+                                 # each explanation. Prevents information
+                                 # overload in alerts.
+  generate_on_score_below: 70    # Explanations are only generated when the
+                                 # trust score drops below this threshold.
+                                 # Avoids wasting compute on healthy devices.
