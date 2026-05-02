@@ -1,7 +1,3 @@
-<p align="center">
-  <img src="sentinel-frontend/public/favicon.svg" alt="Prahari Logo" width="80" />
-</p>
-
 <h1 align="center">Prahari AI</h1>
 
 <p align="center">
@@ -9,13 +5,22 @@
 </p>
 
 <p align="center">
-  <a href="#features">Features</a> •
-  <a href="#demo">Demo</a> •
-  <a href="#architecture">Architecture</a> •
-  <a href="#tech-stack">Tech Stack</a> •
-  <a href="#getting-started">Getting Started</a> •
-  <a href="#api-reference">API</a> •
-  <a href="#team">Team</a>
+  <em>Hindi: प्रहरी — "sentinel / guardian"</em>
+</p>
+
+<p align="center">
+  <a href="#-problem-statement">Problem</a> •
+  <a href="#-features">Features</a> •
+  <a href="#-demo">Demo</a> •
+  <a href="#-architecture">Architecture</a> •
+  <a href="#-tech-stack">Tech Stack</a> •
+  <a href="#-getting-started">Getting Started</a> •
+  <a href="#-api-reference">API</a> •
+  <a href="#-team">Team</a>
+</p>
+
+<p align="center">
+  <em>Built for Vibe-a-thon 2026 · Nitte Meenakshi Institute of Technology · Track: AI and Automation</em>
 </p>
 
 ---
@@ -24,13 +29,14 @@
 
 As smart homes and IoT ecosystems grow, so do the attack surfaces. Consumers deploy cameras, locks, thermostats, and smart speakers — but have **zero visibility** into whether those devices are behaving normally or have been compromised. Traditional firewalls only see packets; they can't tell you *"your thermostat just started scanning 40 internal IP addresses at 3 AM."*
 
-**Prahari AI** (Hindi: प्रहरी — *"sentinel / guardian"*) solves this by continuously profiling every device on the network, detecting behavioral drift in real time using online ML, and letting users investigate anomalies through a conversational AI analyst that speaks English, Hindi, Kannada, Tamil, and Telugu.
+In 2016, the Mirai botnet took down half the internet using IoT devices nobody knew were compromised. Every one of them had drifted from normal to malicious behavior over days. Existing security tools rely on signature matching — they catch known attacks but miss gradual drift entirely. And when alerts do fire, a security analyst spends 20+ minutes reading logs to understand what changed and why.
+
+**Prahari AI** solves both halves of that problem. It continuously profiles every device on the network, detects behavioral drift in real time using online ML, and lets users investigate anomalies through a conversational AI analyst that speaks English, Hindi, Kannada, Tamil, and Telugu.
 
 ---
 
 ## 🎯 Demo
 
-<!-- Update these links once deployed -->
 | Resource | Link |
 |----------|------|
 | 🎥 Demo Video | *Coming soon* |
@@ -72,6 +78,7 @@ As smart homes and IoT ecosystems grow, so do the attack surfaces. Consumers dep
   - `system_remediation` — generate firewall block scripts (iptables/PowerShell) for human approval
 - **Attack pattern classifier**: data exfiltration, lateral scanning, DDoS participation, C2 beaconing, frozen sensor
 - **Multilingual**: full system prompts in English, Hindi (हिंदी), Kannada (ಕನ್ನಡ), Tamil (தமிழ்), Telugu (తెలుగు)
+- **Sovereign by design**: Sarvam runs on Indian infrastructure, keeping telemetry within Indian data jurisdiction (relevant under DPDP Act and CERT-In guidelines for critical infrastructure deployments)
 
 ### 📈 Explainability & Evidence Cards
 - Per-window evidence cards with top-5 deviating features by z-score
@@ -154,7 +161,7 @@ As smart homes and IoT ecosystems grow, so do the attack surfaces. Consumers dep
 
 - **Python 3.12+**
 - **Node.js 20+** and npm
-- A **Sarvam AI API key** ([get one here](https://www.sarvam.ai/))
+- A **Sarvam AI API key** ([get one here](https://dashboard.sarvam.ai/))
 
 ### 1. Clone the Repository
 
@@ -272,8 +279,9 @@ Test suite covers:
 
 | Tool | How It Was Used | What We Modified |
 |------|----------------|-----------------|
-| **Gemini (Google)** | Architecture planning, code scaffolding for FastAPI structure, React component boilerplate | Rewrote all ML pipeline logic, feature engineering, and trust scoring algorithms from scratch based on our domain understanding |
-| **Claude (Anthropic)** | Debugging async issues, test generation, README drafting | Heavily customized all generated test cases, fixed edge cases in SSE streaming, rewrote system prompts |
+| **Claude (Anthropic)** | Architecture planning, PRD authoring, debugging async issues, system prompt engineering, README drafting | Heavily customized all generated test cases, fixed edge cases in SSE streaming, rewrote system prompts for 5 Indian languages |
+| **Codex (OpenAI)** | FastAPI scaffolding, test suite generation, refactoring | Reviewed and edited every generated function; rewrote ML engine logic, trust scoring algorithm, and tool dispatch from scratch based on our domain understanding |
+| **Gemini CLI + ui-ux-pro-max skill** | React component scaffolding, design system generation, Tailwind theming | Refined visual hierarchy, typography, and color palette manually |
 
 ### AI in the Product Itself
 
@@ -364,7 +372,7 @@ Prahari-AI/
 
 ---
 
-## 🧑‍💻 Third-Party APIs & Libraries
+## 🧑💻 Third-Party APIs & Libraries
 
 | Service / Library | Usage | License |
 |-------------------|-------|---------|
@@ -380,16 +388,19 @@ Prahari-AI/
 
 ---
 
-## 👥 Team
+## 👥 Team — The Night's Watch
 
 | Name | Role | Contributions |
 |------|------|---------------|
-| **Daksha** | Full-Stack Lead | ML pipeline architecture, trust engine design, Sarvam AI integration, backend API, frontend dashboard, system prompt engineering |
+| **R Daksha Subramanya** | ML Lead & Backend | ML pipeline architecture, trust engine design, Sarvam AI integration, FastAPI service layer, system prompt engineering |
+| **Sachidanand N C** | Integration & QA | End-to-end integration, deployment configuration, test suite, smoke tests, demo path verification |
+| **Vaishnavi J** | Frontend & Dashboard | React dashboard design, component architecture, charts and visualizations, animation work |
+| **K Kusuma Komali Priya** | Content & AI Demo | System prompt translations across 5 Indian languages, demo script, content review, AI behavior tuning |
 
-> *Eclipse Hackathon — IIT Madras, May 2026*
+> *All members from IIT Madras*
 
 ---
 
 ## 📜 License
 
-This project was built for the Eclipse Hackathon at IIT Madras. All rights reserved by the team.
+This project was built for **Vibe-a-thon 2026** at Nitte Meenakshi Institute of Technology. All rights reserved by the team.
