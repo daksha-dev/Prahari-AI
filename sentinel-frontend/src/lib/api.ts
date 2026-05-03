@@ -2,7 +2,7 @@ import { MOCK_DEVICES, getMockDeviceDetail, getMockEvidenceCard, getMockNetworkS
 import type { Alert, ChatStreamEvent, Device, DeviceDetail, EvidenceCard, NetworkSummary, ScenarioName, Severity } from './types';
 import { reportSarvamFailure, reportSarvamSuccess } from './sarvamHealth';
 
-const API_URL = import.meta.env.VITE_API_URL || 'mock';
+export const API_URL = import.meta.env.VITE_API_URL || 'mock';
 const FEATURE_NAMES = [
   'total_bytes', 'total_packets', 'total_flows', 'packets_per_sec', 'bytes_per_sec',
   'flows_per_sec', 'unique_dst_ips', 'unique_dst_ports', 'dst_ip_entropy', 'port_entropy',
@@ -162,6 +162,11 @@ export const resetDemo = async () => {
   if (API_URL === 'mock') return { ok: true, scenario: 'live' };
   const response = await assertOk(await fetch(`${API_URL}/api/reset`, { method: 'POST' }));
   return response.json();
+};
+
+export const deviceReportUrl = (id: string, language = 'en') => {
+  const base = API_URL === 'mock' ? '' : API_URL;
+  return `${base}/api/devices/${encodeURIComponent(id)}/report?language=${encodeURIComponent(language)}`;
 };
 
 export async function streamChat(

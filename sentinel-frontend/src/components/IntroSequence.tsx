@@ -1,5 +1,5 @@
 import React, { useReducer, useEffect, useRef, useCallback, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 /*
   STATE MACHINE NOTES:
@@ -54,6 +54,16 @@ const initialState: State = {
   authLines: [],
   deviceLines: [],
   baselineLines: [],
+};
+
+const isEditableTarget = (target: EventTarget | null) => {
+  if (!(target instanceof HTMLElement)) return false;
+  return (
+    target.tagName === "INPUT" ||
+    target.tagName === "TEXTAREA" ||
+    target.tagName === "SELECT" ||
+    target.isContentEditable
+  );
 };
 
 function reducer(state: State, action: Action): State {
@@ -183,7 +193,11 @@ const IntroSequence: React.FC = () => {
   }, [state]);
 
   useEffect(() => {
+    if (!isVisible) return;
+
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (isEditableTarget(e.target)) return;
+
       if (e.key === " " || e.key === "Enter") {
         e.preventDefault();
         handleAdvance();
@@ -193,7 +207,7 @@ const IntroSequence: React.FC = () => {
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [handleAdvance]);
+  }, [handleAdvance, isVisible]);
 
   if (!isVisible) return null;
 
@@ -246,7 +260,7 @@ const IntroSequence: React.FC = () => {
             {state.deviceLines.length > 0 && (
               <div className="pt-6 space-y-0">
                 <div className="font-mono text-[14px] text-text-tertiary mb-2">▸ Scanning subnet 192.168.50.0/24...</div>
-                {state.deviceLines.map((line, i) => (
+                {state.deviceLines.map((line) => (
                   <LogLine key={`dev-${line.ip}`} text={`▸ ${line.ip}`} subText={`— ${line.name}`} resolved={line.resolved} />
                 ))}
               </div>

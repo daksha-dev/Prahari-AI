@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { fetchAlerts, fetchDeviceDetail, fetchEvidenceCard } from '../lib/api';
+import { deviceReportUrl, fetchAlerts, fetchDeviceDetail, fetchEvidenceCard } from '../lib/api';
 import type { DeviceDetail, EvidenceCard as EvidenceType } from '../lib/types';
 import TrustTimeline from '../components/TrustTimeline';
 import DriftSignalStack from '../components/DriftSignalStack';
 import BehavioralHeatmap from '../components/BehavioralHeatmap';
 import EvidenceCard from '../components/EvidenceCard';
-import { ArrowLeft, RotateCcw, ShieldAlert, FileText } from 'lucide-react';
+import { ArrowLeft, RotateCcw, ShieldAlert, FileText, Download } from 'lucide-react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { cn } from '../lib/utils';
 import { useLanguage } from '../lib/language';
@@ -92,6 +92,10 @@ export default function DeviceDetailView() {
   };
 
   const severityColor = getSeverityColor(device.trustScore);
+  const handleDownloadReport = () => {
+    if (!id) return;
+    window.open(deviceReportUrl(id, language), '_blank', 'noopener,noreferrer');
+  };
 
   return (
     <div className="flex min-h-full flex-col">
@@ -176,6 +180,13 @@ export default function DeviceDetailView() {
             <button className="h-10 w-full cursor-pointer rounded-md border border-accent bg-bg-base text-accent font-sans text-xs font-semibold uppercase tracking-widest transition-colors duration-150 hover:bg-accent/10 flex items-center justify-center gap-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-base">
               <FileText size={16} />
               {t('generate_playbook')}
+            </button>
+            <button
+              onClick={handleDownloadReport}
+              className="h-10 w-full cursor-pointer rounded-md border border-border bg-bg-elevated text-text-primary font-sans text-xs font-semibold uppercase tracking-widest transition-colors duration-150 hover:border-accent hover:text-accent flex items-center justify-center gap-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-base"
+            >
+              <Download size={16} />
+              {t('download_report')}
             </button>
             <button className="h-8 w-full cursor-pointer rounded-md text-center font-caption text-[10px] uppercase tracking-widest text-text-tertiary transition-colors duration-150 hover:text-text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-base">
               {t('mark_investigated')}

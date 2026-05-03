@@ -4,7 +4,8 @@ import json
 import logging
 from typing import Any
 
-from app.ai.sarvam_client import SarvamUnavailable, sarvam_client
+from app.ai.sarvam_client import SarvamError, SarvamUnavailable, sarvam_client
+from app.ai.stream_parser import content_from_choice, safe_choices, strip_reasoning
 from app.store.memory_store import store
 
 logger = logging.getLogger(__name__)
@@ -69,14 +70,12 @@ async def narrate_incident(device_id: str, window_id: int, language: str = "en")
     try:
         chunks = []
         async for event in sarvam_client.chat([{"role": "user", "content": prompt}], tools=None, language=language, stream=True):
-            delta = event.get("choices", [{}])[0].get("delta", {})
-            message = event.get("choices", [{}])[0].get("message", {})
-            if delta.get("content"):
-                chunks.append(delta["content"])
-            if message.get("content"):
-                chunks.append(message["content"])
-        summary = "".join(chunks).strip() or FALLBACK_NARRATION
-    except SarvamUnavailable:
+            for choice in safe_choices(event):
+                content = content_from_choice(choice)
+                if content:
+                    chunks.append(content)
+        summary = strip_reasoning("".join(chunks)) or FALLBACK_NARRATION
+    except (SarvamUnavailable, SarvamError, IndexError, TypeError, KeyError, AttributeError, ValueError):
         logger.exception("Sarvam narration failed")
         summary = FALLBACK_NARRATION
 

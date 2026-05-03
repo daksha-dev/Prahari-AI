@@ -5,7 +5,7 @@ from typing import Any
 
 import pytest
 
-from app.ai.sarvam_client import SarvamClient, SarvamUnavailable
+from app.ai.sarvam_client import SarvamClient, SarvamError, SarvamUnavailable
 from tests.conftest import FakeSarvamClient, parse_sse
 
 
@@ -46,6 +46,88 @@ async def test_chat_endpoint_streams_tool_calls(client, monkeypatch):
     assert any(event["type"] == "token" and "Summary" in event["content"] for event in events)
     assert events[-1]["type"] == "done"
     assert fake.calls[-1]["messages"][-1]["role"] == "tool"
+
+
+async def test_chat_empty_choices_do_not_raise(client, monkeypatch):
+    fake = FakeSarvamClient(scripts=[[{"choices": []}, {"choices": [{"delta": {"content": "After empty"}}]}]])
+    from app.api import chat as chat_module
+
+    monkeypatch.setattr(chat_module, "sarvam_client", fake)
+    response = await client.post("/api/chat", json={"messages": [{"role": "user", "content": "hi"}], "language": "en"})
+
+    events = parse_sse(response.text)
+    content = "".join(event.get("content", "") for event in events if event["type"] == "token")
+    assert response.status_code == 200
+    assert "After empty" in content
+    assert events[-1]["type"] == "done"
+
+
+async def test_chat_local_tool_fallback_streams_answer(client, fresh_state, monkeypatch):
+    class ToolUnsupportedThenAnswer:
+        def __init__(self) -> None:
+            self.calls: list[dict[str, Any]] = []
+
+        async def chat(self, messages: list[dict[str, Any]], tools=None, language: str = "en", stream: bool = True):
+            self.calls.append({"messages": messages, "tools": tools, "language": language, "stream": stream})
+            if tools:
+                raise SarvamError("Tool calling is not supported for this model.")
+            yield {"choices": []}
+            yield {"choices": [{"delta": {"content": "I checked recent activity and found no alerts."}}]}
+
+    fake = ToolUnsupportedThenAnswer()
+    from app.api import chat as chat_module
+
+    monkeypatch.setattr(chat_module, "sarvam_client", fake)
+    response = await client.post("/api/chat", json={"messages": [{"role": "user", "content": "Show me unusual activity in the last hour"}], "language": "en"})
+
+    events = parse_sse(response.text)
+    content = "".join(event.get("content", "") for event in events if event["type"] == "token")
+    assert response.status_code == 200
+    assert any(event["type"] == "tool_call" for event in events)
+    assert any(event["type"] == "tool_result" for event in events)
+    assert "I checked recent activity" in content
+    assert not any(event["type"] == "error" for event in events)
+    assert events[-1]["type"] == "done"
+
+
+async def test_chat_local_tool_fallback_has_deterministic_answer_when_sarvam_empty(client, fresh_state, monkeypatch):
+    class ToolUnsupportedThenEmpty:
+        async def chat(self, messages: list[dict[str, Any]], tools=None, language: str = "en", stream: bool = True):
+            if tools:
+                raise SarvamError("Tool calling is not supported for this model.")
+            yield {"choices": []}
+
+    from app.api import chat as chat_module
+
+    monkeypatch.setattr(chat_module, "sarvam_client", ToolUnsupportedThenEmpty())
+    response = await client.post("/api/chat", json={"messages": [{"role": "user", "content": "Show me unusual activity in the last hour"}], "language": "en"})
+
+    events = parse_sse(response.text)
+    content = "".join(event.get("content", "") for event in events if event["type"] == "token")
+    assert response.status_code == 200
+    assert "I checked recent activity" in content
+    assert events[-1]["type"] == "done"
+
+
+async def test_chat_local_tool_fallback_has_deterministic_answer_when_second_call_fails(client, fresh_state, monkeypatch):
+    class ToolUnsupportedThenFailure:
+        async def chat(self, messages: list[dict[str, Any]], tools=None, language: str = "en", stream: bool = True):
+            if tools:
+                raise SarvamError("Tool calling is not supported for this model.")
+            raise SarvamError("temporary no-tool failure")
+            yield {}
+
+    from app.api import chat as chat_module
+
+    monkeypatch.setattr(chat_module, "sarvam_client", ToolUnsupportedThenFailure())
+    response = await client.post("/api/chat", json={"messages": [{"role": "user", "content": "Show me unusual activity in the last hour"}], "language": "en"})
+
+    events = parse_sse(response.text)
+    content = "".join(event.get("content", "") for event in events if event["type"] == "token")
+    assert response.status_code == 200
+    assert any(event["type"] == "tool_call" for event in events)
+    assert "I checked recent activity" in content
+    assert events[-1]["type"] == "done"
 
 
 async def test_chat_endpoint_handles_sarvam_error(client, monkeypatch):

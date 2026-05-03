@@ -5,6 +5,25 @@ import json
 import pytest
 
 
+def test_sarvam_key_actually_loaded():
+    """If this test fails, the .env is not being read correctly."""
+    from app.config import settings
+    from pathlib import Path
+
+    env_file = Path(__file__).parent.parent / ".env"
+    if not env_file.exists():
+        pytest.skip(".env not present in test environment")
+
+    assert settings.SARVAM_API_KEY, (
+        f"settings.SARVAM_API_KEY is empty even though {env_file} exists. "
+        f"File size: {env_file.stat().st_size}. "
+        f"Run `python debug_env.py` to diagnose."
+    )
+    assert len(settings.SARVAM_API_KEY) >= 8, (
+        f"SARVAM_API_KEY length is {len(settings.SARVAM_API_KEY)} - looks invalid"
+    )
+
+
 class TestEnvFileResolution:
     def test_env_file_path_resolution(self):
         """Verify the resolved env_file path actually points to a real file."""

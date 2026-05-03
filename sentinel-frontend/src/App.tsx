@@ -68,7 +68,10 @@ function App() {
         <IntroSequence />
         
         <TopBar
-          onAskSentinel={() => setIsChatOpen(true)}
+          onAskSentinel={() => {
+            setIsChatOpen(true);
+            window.dispatchEvent(new Event('sentinel:focus-chat'));
+          }}
         />
         
         <div className="flex flex-1 overflow-hidden">

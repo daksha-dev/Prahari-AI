@@ -29,14 +29,27 @@ export default function AnalystChat({ isOpen, isDesktop, onClose }: AnalystChatP
   }, [messages, isTyping]);
 
   useEffect(() => {
+    if (isOpen) {
+      window.setTimeout(() => inputRef.current?.focus(), 0);
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
     const handleGlobalFocus = (e: KeyboardEvent) => {
       if (e.key === '/' && document.activeElement?.tagName !== 'TEXTAREA' && document.activeElement?.tagName !== 'INPUT') {
         e.preventDefault();
         inputRef.current?.focus();
       }
     };
+    const handleRequestedFocus = () => {
+      window.setTimeout(() => inputRef.current?.focus(), 0);
+    };
     window.addEventListener('keydown', handleGlobalFocus);
-    return () => window.removeEventListener('keydown', handleGlobalFocus);
+    window.addEventListener('sentinel:focus-chat', handleRequestedFocus);
+    return () => {
+      window.removeEventListener('keydown', handleGlobalFocus);
+      window.removeEventListener('sentinel:focus-chat', handleRequestedFocus);
+    };
   }, []);
 
   const handleSend = async () => {
@@ -94,6 +107,10 @@ export default function AnalystChat({ isOpen, isDesktop, onClose }: AnalystChatP
             } : msg));
           }
           if (event.type === 'done') {
+            setMessages(prev => prev.map(msg => msg.id === assistantId && !msg.content.trim() ? {
+              ...msg,
+              content: 'I checked the evidence, but no narrative answer was returned.',
+            } : msg));
             setIsTyping(false);
           }
         },
@@ -106,6 +123,7 @@ export default function AnalystChat({ isOpen, isDesktop, onClose }: AnalystChatP
         role: 'assistant',
         content: 'Sentinel is briefly unavailable. Evidence remains accessible.',
         timestamp: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+        toolCalls: msg.toolCalls,
       } : msg));
     } finally {
       setIsTyping(false);
@@ -142,7 +160,10 @@ export default function AnalystChat({ isOpen, isDesktop, onClose }: AnalystChatP
               {suggestedPrompts.map((q, i) => (
                 <button
                   key={i}
-                  onClick={() => setInput(q)}
+                  onClick={() => {
+                    setInput(q);
+                    window.setTimeout(() => inputRef.current?.focus(), 0);
+                  }}
                   className="flex h-10 w-full cursor-pointer items-center justify-between border-l border-border bg-transparent px-3 text-left font-sans text-body text-text-primary transition-colors duration-150 hover:border-accent hover:bg-bg-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-base"
                 >
                   {q}
@@ -197,11 +218,15 @@ export default function AnalystChat({ isOpen, isDesktop, onClose }: AnalystChatP
         </div>
       </div>
 
-      <div className="h-20 shrink-0 bg-bg-base border-t border-border px-6 py-4">
+      <div
+        className="h-20 shrink-0 cursor-text bg-bg-base border-t border-border px-6 py-4"
+        onClick={() => inputRef.current?.focus()}
+      >
         <div className="relative flex h-full flex-col gap-2">
           <textarea
             ref={inputRef}
             value={input}
+            disabled={false}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !e.shiftKey) {
@@ -210,7 +235,7 @@ export default function AnalystChat({ isOpen, isDesktop, onClose }: AnalystChatP
               }
             }}
             placeholder={t('ask_placeholder')}
-            className="w-full flex-1 resize-none border-none bg-transparent p-0 text-body text-text-primary outline-none placeholder:text-text-tertiary focus-visible:ring-0"
+            className="h-8 min-h-8 w-full resize-none border-none bg-transparent p-0 text-body text-text-primary outline-none placeholder:text-text-tertiary focus-visible:ring-0"
             rows={1}
           />
           <div className="flex items-center justify-between border-t border-border/50 pt-2">

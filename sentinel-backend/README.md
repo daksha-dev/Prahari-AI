@@ -25,7 +25,7 @@ curl http://localhost:8000/healthz
 | --- | --- | --- |
 | `SARVAM_API_KEY` | empty | Required for `/api/chat` and AI summaries. REST endpoints work without it. |
 | `SARVAM_BASE_URL` | `https://api.sarvam.ai` | Sarvam-compatible chat completions base URL. |
-| `SARVAM_MODEL` | `sarvam-105b` | Model sent in chat completion calls. |
+| `SARVAM_MODEL` | `sarvam-m` | Model sent in chat completion calls. Legacy `sarvam-105b` is normalized to `sarvam-m`. |
 | `CORS_ORIGINS` | `http://localhost:5173,https://*.vercel.app` | Comma-separated allowed origins. |
 | `SIMULATOR_ENABLED` | `true` | Starts the background synthetic simulator. |
 | `SIMULATOR_WINDOW_SECONDS` | `5` | Demo-speed window interval. |
@@ -39,6 +39,7 @@ curl http://localhost:8000/healthz
 | `GET` | `/api/devices` | Device summaries with trust sparkline. |
 | `GET` | `/api/devices/{id}` | Full device state, history, drift signals, and heatmap. |
 | `GET` | `/api/devices/{id}/evidence` | Latest evidence card. |
+| `GET` | `/api/devices/{id}/report?language=en` | Download an on-demand PDF incident report for a device. |
 | `GET` | `/api/alerts` | Incidents where trust crossed below 70, newest first. |
 | `GET` | `/api/network-summary` | Aggregate trust counts. |
 | `POST` | `/api/scenario` | Switch simulator scenario and reset state. |
@@ -78,7 +79,7 @@ Create an API key from `dashboard.sarvam.ai`, then set:
 
 ```powershell
 $env:SARVAM_API_KEY="your_key"
-$env:SARVAM_MODEL="sarvam-105b"
+$env:SARVAM_MODEL="sarvam-m"
 $env:SARVAM_BASE_URL="https://api.sarvam.ai"
 ```
 

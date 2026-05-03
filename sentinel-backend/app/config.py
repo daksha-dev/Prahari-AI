@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         env_file=str(ENV_FILE),
-        env_file_encoding="utf-8",
+        env_file_encoding="utf-8-sig",
         extra="ignore",
         case_sensitive=False,
     )
@@ -79,4 +79,8 @@ def get_settings() -> Settings:
 
 
 settings = get_settings()
-logger.info("Settings loaded from %s, key length: %s", ENV_FILE, len(settings.SARVAM_API_KEY))
+logger.info("Settings loaded from: %s", ENV_FILE)
+logger.info("SARVAM_API_KEY length: %s", len(settings.SARVAM_API_KEY))
+logger.info("SARVAM_MODEL: %s", settings.SARVAM_MODEL)
+if not settings.SARVAM_API_KEY:
+    logger.warning("SARVAM_API_KEY is empty. AI Analyst will be unavailable.")

@@ -6,7 +6,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import alerts, chat, devices, ingest
+from app.api import alerts, chat, devices, ingest, report
 from app.config import ENV_FILE, settings
 from app.models.schemas import ScenarioRequest
 from app.simulator.device_simulator import simulator
@@ -28,7 +28,15 @@ async def lifespan(app: FastAPI):
         except Exception as exc:
             logger.error("Sarvam client failed to initialize: %s: %s", type(exc).__name__, exc)
     else:
-        logger.warning("SARVAM_API_KEY missing at boot; AI Analyst chat will report configuration errors.")
+        logger.warning(
+            "SARVAM_API_KEY is empty at boot.\n"
+            "Resolved env file: %s\n"
+            "File exists: %s. File size: %s bytes.\n"
+            "Fix: set SARVAM_API_KEY=<actual_key> in sentinel-backend/.env and restart uvicorn.",
+            ENV_FILE,
+            ENV_FILE.exists(),
+            ENV_FILE.stat().st_size if ENV_FILE.exists() else 0,
+        )
     simulator.window_seconds = settings.simulator_window_seconds
     if settings.simulator_enabled:
         await simulator.start()
@@ -50,6 +58,7 @@ app.include_router(devices.router)
 app.include_router(alerts.router)
 app.include_router(chat.router)
 app.include_router(ingest.router)
+app.include_router(report.router)
 
 
 @app.get("/healthz")

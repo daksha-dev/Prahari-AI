@@ -43,6 +43,7 @@ const enStrings = {
     drift_signal_stack: 'Drift Signal Stack',
     generate_block_script: 'Generate Block Script',
     generate_playbook: 'Generate Playbook',
+    download_report: 'Download Report',
     mark_investigated: 'Mark Investigated',
     ask_anything: 'Ask anything about your network',
     ask_placeholder: 'Ask Sentinel anything...',
@@ -127,6 +128,7 @@ export const strings = {
     drift_signal_stack: 'Drift संकेत स्टैक',
     generate_block_script: 'Block Script बनाएं',
     generate_playbook: 'Playbook बनाएं',
+    download_report: 'रिपोर्ट डाउनलोड करें',
     mark_investigated: 'जांच पूर्ण चिह्नित करें',
     ask_anything: 'अपने नेटवर्क के बारे में कुछ भी पूछें',
     ask_placeholder: 'Sentinel से कुछ भी पूछें...',
@@ -208,6 +210,7 @@ export const strings = {
     drift_signal_stack: 'Drift ಸೂಚನೆ ಸ್ಟ್ಯಾಕ್',
     generate_block_script: 'Block Script ರಚಿಸಿ',
     generate_playbook: 'Playbook ರಚಿಸಿ',
+    download_report: 'ವರದಿ ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ',
     mark_investigated: 'ಪರಿಶೀಲಿಸಲಾಗಿದೆ ಎಂದು ಗುರುತು ಮಾಡಿ',
     ask_anything: 'ನಿಮ್ಮ ನೆಟ್‌ವರ್ಕ್ ಬಗ್ಗೆ ಏನಾದರೂ ಕೇಳಿ',
     ask_placeholder: 'Sentinel ಗೆ ಏನಾದರೂ ಕೇಳಿ...',
@@ -265,8 +268,12 @@ export const strings = {
     prompt_unusual: 'ಕಳೆದ ಗಂಟೆಯ ಅಸಾಮಾನ್ಯ activity ತೋರಿಸಿ',
     prompt_health: 'ಪ್ರಸ್ತುತ network health ಸಾರಾಂಶ ನೀಡಿ',
   },
-  ta: {},
-  te: {},
+  ta: {
+    download_report: 'அறிக்கையை பதிவிறக்கம் செய்க',
+  },
+  te: {
+    download_report: 'నివేదిక డౌన్‌లోడ్ చేయండి',
+  },
 } satisfies Record<Language, Partial<Record<keyof typeof enStrings, string>>>;
 
 export type StringKey = keyof typeof enStrings;
