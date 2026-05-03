@@ -20,7 +20,7 @@
 </p>
 
 <p align="center">
-  <em>Built for Vibe-a-thon 2026 · Nitte Meenakshi Institute of Technology · Track: AI and Automation</em>
+  <em>Built for Vibe-a-thon 2026 · Nitte Meenakshi Institute of Technology </em>
 </p>
 
 ---
