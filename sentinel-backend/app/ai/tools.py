@@ -81,9 +81,9 @@ async def system_remediation(device_id: str, platform: str = "iptables") -> dict
     platform = platform.lower()
     if platform == "powershell":
         block_script = (
-            f"New-NetFirewallRule -DisplayName \"Block Sentinel device {ip}\" "
+            f"New-NetFirewallRule -DisplayName \"Block Prahari device {ip}\" "
             f"-Direction Outbound -RemoteAddress {ip} -Action Block\n"
-            f"New-NetFirewallRule -DisplayName \"Block inbound Sentinel device {ip}\" "
+            f"New-NetFirewallRule -DisplayName \"Block inbound Prahari device {ip}\" "
             f"-Direction Inbound -RemoteAddress {ip} -Action Block"
         )
     elif platform == "iptables":

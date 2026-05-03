@@ -175,7 +175,7 @@ export async function streamChat(
   language = 'en',
 ) {
   if (API_URL === 'mock') {
-    onEvent({ type: 'token', content: 'Mock mode is active. Set VITE_API_URL to your Railway backend for live Sentinel analysis.' });
+    onEvent({ type: 'token', content: 'Mock mode is active. Set VITE_API_URL to your Railway backend for live Prahari analysis.' });
     onEvent({ type: 'done' });
     reportSarvamSuccess();
     return;

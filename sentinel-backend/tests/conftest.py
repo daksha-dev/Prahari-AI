@@ -38,7 +38,7 @@ def advance_simulator():
 
 class FakeSarvamClient:
     def __init__(self, scripts: list[list[dict[str, Any]]] | None = None, error: Exception | None = None) -> None:
-        self.scripts = scripts or [[{"choices": [{"delta": {"content": "Mock Sentinel response"}}]}]]
+        self.scripts = scripts or [[{"choices": [{"delta": {"content": "Mock Prahari response"}}]}]]
         self.error = error
         self.calls: list[dict[str, Any]] = []
 

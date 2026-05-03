@@ -1,1 +1,1 @@
-"""Sentinel backend tests."""
+"""Prahari backend tests."""

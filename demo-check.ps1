@@ -45,7 +45,7 @@ for ($elapsed = 0; $elapsed -le 90; $elapsed += 10) {
 }
 
 Write-Host ""
-Write-Host "Asking Sentinel chat: What is wrong with the thermostat?" -ForegroundColor Cyan
+Write-Host "Asking Prahari chat: What is wrong with the thermostat?" -ForegroundColor Cyan
 
 try {
     $tempFile = [System.IO.Path]::GetTempFileName()

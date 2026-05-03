@@ -8,7 +8,7 @@ import { motion } from 'framer-motion';
   - Stage authenticating: 3 lines resolve at 600ms intervals.
   - Stage discovering: 12 devices resolve at 120ms intervals.
   - Stage locking: 4 baseline lines resolve at 300ms intervals.
-  - Stage ready: "SENTINEL READY" display, waits for final click to enter dashboard.
+  - Stage ready: "PRAHARI READY" display, waits for final click to enter dashboard.
   - Stage complete: Intro fades out and unmounts.
   - StrictMode safety: Ref-tracked 'scheduled' flag prevents duplicate effect execution in dev.
 */
@@ -247,7 +247,7 @@ const IntroSequence: React.FC = () => {
         }}
         transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
       >
-        Sentinel<span className="text-accent">.</span>
+        Prahari<span className="text-accent">.</span>
       </motion.div>
 
       {/* Terminal Content */}
@@ -283,7 +283,7 @@ const IntroSequence: React.FC = () => {
                     animate={{ opacity: 1, y: 0 }}
                     className="font-display text-4xl text-text-primary"
                   >
-                    SENTINEL READY
+                    PRAHARI READY
                   </motion.div>
                 )}
                 <Prompt text={getPromptText()} />

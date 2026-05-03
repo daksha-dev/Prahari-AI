@@ -1,4 +1,4 @@
-# Sentinel Backend
+# Prahari Backend
 
 FastAPI backend for an IoT trust-monitoring demo. It wraps a 22-feature trust analytics engine, runs a synthetic simulator for 12 devices, exposes REST polling endpoints, and provides a Sarvam-backed AI analyst over Server-Sent Events.
 

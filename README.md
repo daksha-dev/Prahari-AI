@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <em>Hindi: प्रहरी — "sentinel / guardian"</em>
+  <em>Hindi: प्रहरी — "prahari / guardian"</em>
 </p>
 
 <p align="center">

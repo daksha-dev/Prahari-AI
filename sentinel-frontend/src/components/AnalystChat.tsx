@@ -121,7 +121,7 @@ export default function AnalystChat({ isOpen, isDesktop, onClose }: AnalystChatP
       setMessages(prev => prev.map(msg => msg.id === assistantId ? {
         id: assistantId,
         role: 'assistant',
-        content: 'Sentinel is briefly unavailable. Evidence remains accessible.',
+        content: 'Prahari is briefly unavailable. Evidence remains accessible.',
         timestamp: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
         toolCalls: msg.toolCalls,
       } : msg));

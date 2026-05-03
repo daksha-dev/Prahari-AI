@@ -45,7 +45,7 @@ async def lifespan(app: FastAPI):
         await simulator.stop()
 
 
-app = FastAPI(title="Sentinel IoT Trust Backend", version="1.0.0", lifespan=lifespan)
+app = FastAPI(title="Prahari IoT Trust Backend", version="1.0.0", lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins,

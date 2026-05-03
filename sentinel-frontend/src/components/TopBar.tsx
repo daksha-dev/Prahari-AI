@@ -15,7 +15,7 @@ export default function TopBar({ onAskSentinel }: TopBarProps) {
     <header className="h-[56px] bg-bg-base border-b border-border flex items-center justify-between px-8 sticky top-0 z-[60]">
       <div className="flex items-center gap-6">
         <Link to="/" className="font-display text-2xl text-text-primary hover:opacity-80 transition-opacity">
-          Sentinel<span className="text-accent">.</span>
+          Prahari<span className="text-accent">.</span>
         </Link>
         
         <div className="h-4 w-[1px] bg-border" />

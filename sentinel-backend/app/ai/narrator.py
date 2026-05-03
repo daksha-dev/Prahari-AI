@@ -11,7 +11,7 @@ from app.store.memory_store import store
 logger = logging.getLogger(__name__)
 
 NARRATION_PROMPT = (
-    "You are Sentinel's incident narrator. Given the structured evidence below for an IoT device that just dropped below trust threshold 70, "
+    "You are Prahari's incident narrator. Given the structured evidence below for an IoT device that just dropped below trust threshold 70, "
     "write a concise 4-6 sentence incident summary for a security analyst. Lead with what the device is and what just changed. "
     "Then explain which behaviors deviated, by how much, and what attack pattern it resembles. End with one sentence on what action to consider. "
     "No bullet points, no headers, just plain prose. Do not use technical jargon without translating it inline.\n\n"
@@ -27,7 +27,7 @@ LANGUAGE_INSTRUCTIONS = {
 }
 
 FALLBACK_NARRATION = (
-    "Sentinel detected a trust drop below 70 for this IoT device. "
+    "Prahari detected a trust drop below 70 for this IoT device. "
     "The latest evidence shows behavior moving away from the device baseline, which may indicate compromise or misuse. "
     "Review the evidence card, confirm whether this behavior is expected, and consider isolating the device if the deviation continues."
 )

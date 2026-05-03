@@ -33,7 +33,7 @@ function Test-PostJson($name, $path, $body) {
     }
 }
 
-Write-Host "Running Sentinel smoke tests against $backendUrl" -ForegroundColor Cyan
+Write-Host "Running Prahari smoke tests against $backendUrl" -ForegroundColor Cyan
 
 Test-Get "healthz" "/healthz"
 Test-Get "devices" "/api/devices"

@@ -1,1 +1,1 @@
-"""Sentinel backend package."""
+"""Prahari backend package."""

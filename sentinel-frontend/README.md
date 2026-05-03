@@ -1,4 +1,4 @@
-# Sentinel Dashboard
+# Prahari Dashboard
 
 AI Security Analyst for IoT Networks.
 
