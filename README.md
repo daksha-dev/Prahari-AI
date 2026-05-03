@@ -1,7 +1,7 @@
 <h1 align="center">Prahari AI</h1>
 
 <p align="center">
-  <strong>Intelligent IoT Network Trust & Anomaly Monitoring — Powered by Sarvam AI</strong>
+  <strong>Intelligent IoT Network Trust & Anomaly Monitoring</strong>
 </p>
 
 <p align="center">
