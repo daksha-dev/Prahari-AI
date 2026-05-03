@@ -16,7 +16,7 @@
   <a href="#-tech-stack">Tech Stack</a> •
   <a href="#-getting-started">Getting Started</a> •
   <a href="#-api-reference">API</a> •
-  <a href="#-team">Team</a>
+  <a href="#-team-—-the-night's-watch">Team</a>
 </p>
 
 <p align="center">
