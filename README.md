@@ -39,7 +39,7 @@ In 2016, the Mirai botnet took down half the internet using IoT devices nobody k
 
 | Resource | Link |
 |----------|------|
-| 🎥 Demo Video | *Coming soon* |
+| 🎥 Demo Video | [Demo link](https://drive.google.com/file/d/15CZ7yIwnZpVzUYHf-jzdRblMIkIPmeOs/view?usp=sharing)|
 | 🌐 Live Frontend | [Vercel](https://prahari-ai-five.vercel.app/) |
 | 🔧 Live Backend | [Railway](https://prahari-ai-production.up.railway.app/) |
 | 📂 GitHub Repo | [daksha-dev/Prahari-AI](https://github.com/daksha-dev/Prahari-AI) |
